@@ -148,7 +148,7 @@ export default function Home() {
         )}
       </main>
       <footer className="text-gray-600 text-center text-md mt-2">
-        Built with Next.js, Tailwind CSS, and OpenAI | Github
+        Built with Next.js, Tailwind CSS, and OpenAI | <a href="https://github.com/adaydesign/ai-react-component-generator-tool" target="_blank">Github</a>
       </footer>
     </div>
   );
