@@ -1,35 +1,40 @@
-import { useState, useRef } from "react";
-import { Toaster, toast } from "react-hot-toast";
-import { ClipLoader } from "react-spinners";
+import { useState, useRef } from "react"
+import { Toaster, toast } from "react-hot-toast"
+import { ClipLoader } from "react-spinners"
 
 // Define a default function component called Home
 export default function Home() {
-
+  const [userToken, setUserToken] = useState<string>("")
   // Define three state variables for the original text, paraphrased text, and paraphrase mode
-  const [originalText, setOriginalText] = useState<string>("");
-  const [paraphrasedText, setParaphrasedText] = useState<string>("");
-  const [paraphraseMode, setParaphraseMode] = useState<string>("CSS");
+  const [originalText, setOriginalText] = useState<string>("")
+  const [paraphrasedText, setParaphrasedText] = useState<string>("")
+  const [paraphraseMode, setParaphraseMode] = useState<string>("CSS")
 
   // Define a ref for the text area element
-  const textAreaRef = useRef(null);
+  const textAreaRef = useRef(null)
 
   // Define a state variable for the loading state of the paraphrasing operation
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false)
 
   // Construct a prompt string based on the original text and paraphrase mode
   //const prompt = `Paraphrase "${originalText}" using ${paraphraseMode} mode. Do not add any additional word.`;
-  const prompt = `react component of "${originalText}" using ${paraphraseMode} as UI library. Show only code.`;
+  const prompt = `write code program with react component for "${originalText}" using ${paraphraseMode} as UI library. Show only code.`
 
   // Define an async function to handle the paraphrasing operation
   const handleParaphrase = async (e: React.FormEvent) => {
     // Prevent form submission if original text is empty
     if (!originalText) {
-      toast.error("Enter text to paraphrase!");
-      return;
+      toast.error("Enter text to paraphrase!")
+      return
+    }
+
+    if (!userToken) {
+      toast.error("Enter your API Token Key")
+      return
     }
 
     // Set the loading state and reset the paraphrased text
-    setLoading(true);
+    setLoading(true)
 
     // Send a POST request to the "/api/paraphrase" API endpoint with the prompt in the request body
     const response = await fetch("/api/paraphrase", {
@@ -39,27 +44,51 @@ export default function Home() {
       },
       body: JSON.stringify({
         prompt,
+        userToken,
       }),
-    });
+    })
 
     // Parse the response as JSON
-    const data = await response.json();
+    const data = await response.json()
 
     // Set the paraphrased text to the first choice's message content in the response
-    setParaphrasedText(data.choices[0].message.content);
+    // console.log(data)
+    if (data.choices && data.choices?.length > 0) {
+      setParaphrasedText(data.choices[0].message.content)
+    } else if (data.error) {
+      toast.error(data.error?.message)
+    } else {
+      toast.error("nothing...")
+    }
 
     // Reset the loading state
-    setLoading(false);
-  };
-
+    setLoading(false)
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gray-100">
       <main className="max-w-4xl w-full bg-white rounded-lg shadow-md p-6 mb-4">
         <h1 className="text-4xl font-bold mb-4">AI React Component Tool</h1>
-        <p className="text-sm mb-8">
-          Enter the text you want to create a react component below, select a ui library,
-          and click on the [Get Code] button to see the results!
+        <div className="mb-4">
+          <p className="text-sm mb-2">
+          Please provide your OpenAI API Key. We only store this key locally and never send it to our servers. - {" "}
+            <a
+              href="https://platform.openai.com/account/api-keys"
+              target="_blank"
+            >
+              https://platform.openai.com/account/api-keys
+            </a>
+          </p>
+          <input
+            className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full px-4 py-2 sm:text-lg border-gray-300 rounded-md border"
+            value={userToken}
+            onChange={(e) => setUserToken(e.target.value)}
+            placeholder="Enter you API Key"
+          />
+        </div>
+        <p className="text-sm mb-2">
+          Enter the text you want to create a react component below, select a ui
+          library, and click on the [Get Code] button to see the results!
         </p>
         <div className="mb-4">
           <textarea
@@ -88,8 +117,8 @@ export default function Home() {
             <option value="Tailwind CSS">Tailwind CSS</option>
             <option value="MUI">MUI</option>
             <option value="AntDesign">AntDesign</option>
-            <option value="ChakraUI">ChakraUI</option> 
-            <option value="React Bootstrap">React Bootstrap</option> 
+            <option value="ChakraUI">ChakraUI</option>
+            <option value="React Bootstrap">React Bootstrap</option>
           </select>
         </div>
         <div className="mb-4">
@@ -119,8 +148,8 @@ export default function Home() {
               <button
                 title="Copy"
                 onClick={() => {
-                  navigator.clipboard.writeText(paraphrasedText);
-                  toast.success("Copied to clipboard");
+                  navigator.clipboard.writeText(paraphrasedText)
+                  toast.success("Copied to clipboard")
                 }}
                 className="bg-blue-600 hover:bg-blue-800 text-white text-lg h-8 w-7 rounded-full ml-3 focus:outline-none cursor-pointer"
               >
@@ -136,20 +165,25 @@ export default function Home() {
                 </svg>
               </button>
             </h2>
-            
+
             <p
               className="p-4 sm:text-lg border-gray-300 rounded-md bg-gray-800 text-white mt-2 sm:mt-0 w-full"
               style={{ whiteSpace: "pre-wrap" }}
             >
               {paraphrasedText}
-             
             </p>
           </div>
         )}
       </main>
       <footer className="text-gray-600 text-center text-md mt-2">
-        Built with Next.js, Tailwind CSS, and OpenAI | <a href="https://github.com/adaydesign/ai-react-component-generator-tool" target="_blank">Github</a>
+        Built with Next.js, Tailwind CSS, and OpenAI |{" "}
+        <a
+          href="https://github.com/adaydesign/ai-react-component-generator-tool"
+          target="_blank"
+        >
+          Github
+        </a>
       </footer>
     </div>
-  );
+  )
 }

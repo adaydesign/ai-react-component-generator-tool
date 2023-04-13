@@ -29,7 +29,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     // Get prompt from request body
     const prompt = req.body.prompt;
-
+    const userToken = req.body.userToken
+    // console.log(req.body)
     // Validate the prompt
     if (!prompt) {
       return new Response("No prompt in the request", { status: 400 });
@@ -48,7 +49,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${
-          process.env.NEXT_PUBLIC_ENV_VARIABLE_OPEN_AI_API_KEY ?? ""
+          //process.env.NEXT_PUBLIC_ENV_VARIABLE_OPEN_AI_API_KEY ?? ""
+          userToken
         }`,
       },
       method: "POST",
